@@ -5,7 +5,13 @@ module Nashorn
     def initialize(native)
       @native = native # might be a NativeException wrapping a Java Throwable
       if ( value = self.value(true) ) != nil
-        super value.is_a?(Exception) ? "#{value.class.name}: #{value.message}" : value
+        if value.is_a?(Exception)
+          super "#{value.class.name}: #{value.message}"
+        elsif value.is_a?(JS::ScriptObject) # && @native.to_s.index('Error:')
+          super @native.message
+        else
+          super value
+        end
       else
         super cause ? cause.message : @native
       end

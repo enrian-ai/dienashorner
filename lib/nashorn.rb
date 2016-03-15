@@ -13,6 +13,8 @@ module Nashorn
   # @private
   module JS
     include_package 'jdk.nashorn.api.scripting'
+    # include_package 'jdk.nashorn.internal.runtime'
+    ScriptObject = Java::JdkNashornInternalRuntime::ScriptObject rescue nil
   end
 
   class << self

@@ -8,7 +8,7 @@ module Nashorn
       end
 
       def []=(key, value)
-        name.is_a?(Fixnum) ? setSlot(key, value) : setMember(key.to_s, value)
+        key.is_a?(Fixnum) ? setSlot(key, value) : setMember(key.to_s, value)
       end
 
       # enumerate the key value pairs contained in this javascript object. e.g.
@@ -135,6 +135,28 @@ module Nashorn
 
     AbstractJSObject.module_eval do
       alias_method :__call__, :call
+    end
+
+    ScriptObjectMirror.module_eval do # implements java.util.Map
+
+      # @private NOTE: duplicated from JSObject
+      def [](key)
+        Nashorn.to_rb key.is_a?(Fixnum) ? getSlot(key) : getMember(key.to_s)
+      end
+
+      # @private NOTE: duplicated from JSObject
+      def []=(key, value)
+        key.is_a?(Fixnum) ? setSlot(key, value) : setMember(key.to_s, value)
+      end
+
+      # @private NOTE: duplicated from JSObject
+      def call(*args)
+        this = nil
+        Nashorn.to_rb __call__ this, Nashorn.args_to_js(args)
+      rescue JS::NashornException => e
+        raise Nashorn::JSError.new(e)
+      end
+
     end
 
     NashornException.class_eval do
