@@ -233,10 +233,22 @@ module Nashorn
         # unless args.first.is_a?(JS::Context)
         #   return super # assume a Ruby #call
         # end
-        this, args = *args # Java Function#call dispatch
-        # args = args.to_a # java.lang.Object[] -> Array
-        # JS function style :
+
+        # NOTE: distinguish a Ruby vs Java call here :
+        arr = args[1]
+        if arr && args.size == 2 && # Java Function#call dispatch
+           arr.respond_to?(:java_class) && arr.java_class.array?
+          this = args[0]; args = arr.to_a; java_args = true
+        end
+        # this = args.shift # Java Function#call dispatch
+
         callable = @unwrap
+
+        if callable.is_a?(UnboundMethod)
+          this = args.shift unless java_args
+          callable = callable.bind(Nashorn.to_rb(this)) # TODO wrap TypeError ?
+        end
+        # JS function style :
         if ( arity = callable.arity ) != -1 # (a1, *a).arity == -2
           if arity > -1 && args.size > arity # omit 'redundant' arguments
             args = args.slice(0, arity)
@@ -246,17 +258,15 @@ module Nashorn
           end
         end
         rb_args = Nashorn.args_to_rb(args)
-
-        if callable.is_a?(UnboundMethod)
-          callable = callable.bind(Nashorn.to_rb(this)) # might end up as TypeError
-        end
-
         begin
           result = callable.call(*rb_args)
         rescue StandardError, ScriptError => e
-          raise Ruby.wrap_error(e) # thus `try { } catch (e)` works in JS
+          raise e unless java_args
+          # TODO is this wrapping needed with __Nashorn__ ?
+          raise Ruby.wrap_error(e, e.backtrace) # thus `try { } catch (e)` works in JS
         end
-        Nashorn.to_js(result)
+        java_args ? Nashorn.to_js(result) : result
+        # Nashorn.to_js(result) # TODO do not convert if java_args ?
       end
 
       # make sure redefined :call is aliased not the one "inherited" from
@@ -333,8 +343,10 @@ module Nashorn
 
     end
 
-    def self.wrap_error(e)
-      Exception.new(e)
+    def self.wrap_error(e, backtrace = nil)
+      error = Exception.new(e)
+      error.set_backtrace(backtrace) if backtrace
+      error
     end
 
   end

@@ -136,8 +136,8 @@ describe Nashorn::Ruby::Function do
 
   it "is (JavaScript) callable as a function" do
     rb_function = Nashorn::Ruby::Function.wrap 'foo'.method(:upcase)
-    this = nil; args = nil
-    rb_function.call(this, args).should == 'FOO'
+    this = nil
+    rb_function.call(this).should == 'FOO'
   end
 
   it 'is Ruby callable' do
@@ -150,18 +150,18 @@ describe Nashorn::Ruby::Function do
     rb_function.call('o').should == ['o', 'o']
   end
 
-  it "args get converted before delegating a ruby function call" do
-    klass = Class.new(Object) do
-      def foo(array)
-        array.all? { |elem| elem.is_a?(String) }
-      end
-    end
-    rb_function = Nashorn::Ruby::Function.wrap method = klass.new.method(:foo)
-    this = nil
-    args = [ '1'.to_java, java.lang.String.new('2') ].to_java
-    # args = [ Rhino::JS::NativeArray.new(args) ].to_java
-    rb_function.call(this, args).should be(true)
-  end
+#  it "args get converted before delegating a ruby function call" do
+#    klass = Class.new(Object) do
+#      def foo(array)
+#        array.all? { |elem| elem.is_a?(String) }
+#      end
+#    end
+#    rb_function = Nashorn::Ruby::Function.wrap klass.new.method(:foo)
+#    this = nil
+#    args = [ '1'.to_java, java.lang.String.new('2') ].to_java
+#    # args = [ Rhino::JS::NativeArray.new(args) ].to_java
+#    rb_function.call(this, args).should be(true)
+#  end
 
   it "returned value gets converted to javascript" do
     klass = Class.new(Object) do
@@ -169,7 +169,7 @@ describe Nashorn::Ruby::Function do
         [ 42 ]
       end
     end
-    rb_function = Nashorn::Ruby::Function.wrap method = klass.new.method(:foo)
+    rb_function = Nashorn::Ruby::Function.wrap klass.new.method(:foo)
     this = nil; args = [].to_java
     rb_function.call(this, args).should be_a(Nashorn::JS::JSObject)
     rb_function.call(this, args).isArray.should be true
@@ -288,9 +288,10 @@ describe Nashorn::Ruby::Constructor do
 
   it "is callable as a function" do
     rb_new = Nashorn::Ruby::Constructor.wrap Foo
-    this = nil; args = nil
-    rb_new.__call__(this, args).should be_a(Nashorn::Ruby::Object)
-    rb_new.__call__(this, args).unwrap.should be_a(Foo)
+    this = nil
+    rb_new.__call__().should be_a(Nashorn::Ruby::Object)
+    # rb_new.__call__(this).should be_a(Nashorn::Ruby::Object)
+    rb_new.__call__(this, [].to_java).unwrap.should be_a(Foo)
   end
 
   it "returns correct arity and length" do
