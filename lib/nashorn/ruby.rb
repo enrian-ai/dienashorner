@@ -76,11 +76,13 @@ module Nashorn
       # @override JSObject
       def keySet
         ids = java.util.HashSet.new
+        super_set = super
         unwrap.public_methods(false).each do |name|
-          next unless name = convert(name)
-          ids.add name.to_s.to_java # java.lang.String
+          next unless name = convert(name.to_s)
+          unless super_set.include?(name)
+            ids.add name.to_java # java.lang.String
+          end
         end
-        super.each { |id| ids.remove(id) }
         ids
       end
 
@@ -210,9 +212,9 @@ module Nashorn
 
       # @override
       def call(*args) # call(Object thiz, Object... args)
-        unless args.first.is_a?(JS::Context)
-          return super # assume a Ruby #call
-        end
+        # unless args.first.is_a?(JS::Context)
+        #   return super # assume a Ruby #call
+        # end
         this, args = *args # Java Function#call dispatch
         args = args.to_a # java.lang.Object[] -> Array
         # JS function style :
