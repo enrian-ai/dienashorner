@@ -114,7 +114,7 @@ module Nashorn
 
       # use JavaScript functions constructors from Ruby as `fn.new`
       def new(*args)
-        construct Nashorn.args_to_js(args)
+        newObject Nashorn.args_to_js(args)
       rescue JS::NashornException => e
         raise Nashorn::JSError.new(e)
       end
