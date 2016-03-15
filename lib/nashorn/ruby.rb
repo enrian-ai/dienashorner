@@ -149,9 +149,20 @@ module Nashorn
       def equals(other)
         other.is_a?(Object) && unwrap.eql?(other.unwrap)
       end
-      alias_method :==, :equals
+
+      def ==(other)
+        if other.is_a?(Object)
+          unwrap == other.unwrap
+        else
+          unwrap == other
+        end
+      end
 
       def hashCode; @unwrap.hash end
+
+      def to_a
+        isArray ? @unwrap : super
+      end
 
     end
 
@@ -208,7 +219,14 @@ module Nashorn
         # JS == means they might be bind to different objects :
         unwrap.to_s == other.unwrap.to_s # "#<Method: Foo#bar>"
       end
-      alias_method :==, :equals
+
+      def ==(other)
+        if other.is_a?(Object)
+          unwrap == other.unwrap
+        else
+          unwrap == other
+        end
+      end
 
       # @override
       def call(*args) # call(Object thiz, Object... args)
