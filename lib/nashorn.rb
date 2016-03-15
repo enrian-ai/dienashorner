@@ -29,4 +29,5 @@ end
 require 'nashorn/version'
 require 'nashorn/ext'
 require 'nashorn/convert'
+require 'nashorn/error'
 require 'nashorn/ruby'

@@ -3,7 +3,7 @@ module Nashorn
   class JSError < StandardError
 
     def initialize(native)
-      @native = native # NativeException wrapping a Java Throwable
+      @native = native # might be a NativeException wrapping a Java Throwable
       if ( value = self.value(true) ) != nil
         super value.is_a?(Exception) ? "#{value.class.name}: #{value.message}" : value
       else
@@ -20,6 +20,7 @@ module Nashorn
     # Returns the (nested) cause of this error if any.
     def cause
       return @cause if defined?(@cause)
+
       if @native.respond_to?(:cause) && @native.cause
         @cause = @native.cause
       else
@@ -67,6 +68,20 @@ module Nashorn
       JS::NashornException.getScriptFrames(cause).map do |element|
         raw_elements ? element : element.to_s # ScriptStackElement
       end
+    end
+
+    # jdk.nashorn.internal.runtime::ECMAException < NashornException has these :
+
+    def file_name
+      cause.respond_to?(:getFileName) ? cause.getFileName : nil
+    end
+
+    def line_number
+      cause.respond_to?(:getLineNumber) ? cause.getLineNumber : nil
+    end
+
+    def column_number
+      cause.respond_to?(:getColumnNumber) ? cause.getColumnNumber : nil
     end
 
     private

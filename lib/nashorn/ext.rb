@@ -92,7 +92,7 @@ module Nashorn
 
       # function :
 
-      alias_method :__call__, :call
+      # alias_method :__call__, :call
 
       # make JavaScript functions callable Ruby style e.g. `fn.call('42')`
       #
@@ -132,5 +132,14 @@ module Nashorn
       alias_method :methodcall, :apply # V8::Function compatibility
 
     end
+
+    AbstractJSObject.module_eval do
+      alias_method :__call__, :call
+    end
+
+    NashornException.class_eval do
+      alias_method :value, :thrown
+    end
+
   end
 end
