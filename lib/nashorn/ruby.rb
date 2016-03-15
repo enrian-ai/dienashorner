@@ -234,7 +234,7 @@ module Nashorn
         #   return super # assume a Ruby #call
         # end
         this, args = *args # Java Function#call dispatch
-        args = args.to_a # java.lang.Object[] -> Array
+        # args = args.to_a # java.lang.Object[] -> Array
         # JS function style :
         callable = @unwrap
         if ( arity = callable.arity ) != -1 # (a1, *a).arity == -2
@@ -246,10 +246,12 @@ module Nashorn
           end
         end
         rb_args = Nashorn.args_to_rb(args)
+
+        if callable.is_a?(UnboundMethod)
+          callable = callable.bind(Nashorn.to_rb(this)) # might end up as TypeError
+        end
+
         begin
-          if callable.is_a?(UnboundMethod)
-            callable.bind(Nashorn.to_rb(this)) # might end up as TypeError
-          end
           result = callable.call(*rb_args)
         rescue StandardError, ScriptError => e
           raise Ruby.wrap_error(e) # thus `try { } catch (e)` works in JS

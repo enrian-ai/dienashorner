@@ -4,6 +4,8 @@ class << Nashorn
     return nil if Nashorn::JS::ScriptObjectMirror.isUndefined(object)
     # ConsString for optimized String + operations :
     return object.toString if object.is_a?(Java::JavaLang::CharSequence)
+    return object.unwrap if object.is_a?(Nashorn::Ruby::Object)
+    return object.unwrap if object.is_a?(Nashorn::Ruby::Function)
     object
   end
   alias_method :to_ruby, :to_rb
