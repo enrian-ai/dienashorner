@@ -1,7 +1,4 @@
 require 'nashorn'
-
-$LOADED_FEATURES << 'rhino'
-
 require 'nashorn/context'
 
 module Nashorn
@@ -27,4 +24,11 @@ module Nashorn
     JavaScriptException = NashornException
     RhinoException = NashornException
   end
+end
+
+if Object.const_defined?(:Rhino)
+  warn "therubyrhino seems to be loaded, Nashorn won't emulate Rhino"
+else
+  $LOADED_FEATURES << 'rhino'
+  Rhino = Nashorn # the-borg!
 end
