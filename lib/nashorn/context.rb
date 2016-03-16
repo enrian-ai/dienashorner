@@ -2,31 +2,18 @@ require 'stringio'
 
 module Nashorn
 
-  # ==Overview
-  #  All Javascript must be executed in a context which represents the execution environment in
-  #  which scripts will run. The environment consists of the standard javascript objects
-  #  and functions like Object, String, Array, etc... as well as any objects or functions which
-  #  have been defined in it. e.g.
+  # JavaScript gets executed in a context which represents the execution environment
+  # in which scripts run. The environment consists of the standard JavaScript objects
+  # and functions like `Object`, `parseInt()` or `null`, as well as any objects or
+  # functions which have been defined in it. e.g.
   #
   #   Context.open do |js|
-  #     js['num'] = 5
-  #     js.eval('num + 5') #=> 10
+  #     js['answer'] = 22
+  #     js['compute'] = lambda { |t| 10 * t }
+  #     js.eval('num + compute(2)') #=> 42
   #   end
   #
-  # == Multiple Contexts.
-  #
-  #   six = 6
-  #   Context.open do |js|
-  #     js['num'] = 5
-  #     js.eval('num') # => 5
-  #     Context.open do |js|
-  #       js['num'] = 10
-  #       js.eval('num') # => 10
-  #       js.eval('++num') # => 11
-  #     end
-  #     js.eval('num') # => 5
-  #   end
-  #
+  # @note Context are isolated, multiple context do not share any JS objects!
   class Context
 
     class << self
@@ -41,9 +28,13 @@ module Nashorn
 
     end
 
+    # @private
     ENGINE_SCOPE = javax.script.ScriptContext.ENGINE_SCOPE
+    # @private
     NashornScriptEngineFactory = JS::NashornScriptEngineFactory
+    # @private
     NASHORN_GLOBAL = JS::NashornScriptEngine::NASHORN_GLOBAL.to_java
+    # @private
     SimpleScriptContext = javax.script.SimpleScriptContext
 
     # Create a new JavaScript environment for executing JS (and Ruby) code.
@@ -54,7 +45,13 @@ module Nashorn
         java = options[:java]
         version = options[:javascript_version] || options[:language_version]
         if version
-          args = [ '--language', version.to_s ]
+          (args ||= []).push '--language', version.to_s
+        end
+        if options.key?(:strict)
+          (args ||= []).push '-strict', (!!options[:strict]).to_s
+        end
+        if options.key?(:scripting)
+          (args ||= []).push '-scripting', (!!options[:scripting]).to_s
         end
       elsif options.is_a?(String)
         args = options.split(' ')
@@ -113,13 +110,11 @@ module Nashorn
 
     def evaluate(source); eval(source) end
 
-    # Read the contents of <tt>filename</tt> and evaluate it as javascript. Returns the result of evaluating the
-    # javascript. e.g.
+    # Read the contents of <tt>filename</tt> and evaluate it as JavaScript.
     #
-    # Context.open do |cxt|
-    #   cxt.load("path/to/some/lib.js")
-    # end
+    #   Context.open { |js_env| js_env.load("path/to/some/lib.js") }
     #
+    # @return the result of evaluating the JavaScript
     def load(filename)
       File.open(filename) do |file|
         eval file, filename
@@ -130,7 +125,7 @@ module Nashorn
       factory.getLanguageVersion
     end
 
-    # Get the JS interpreter version.
+    # Get the JavaScript language version.
     # @private
     def javascript_version
       case version = language_version
@@ -142,13 +137,13 @@ module Nashorn
     end
     alias :version :javascript_version
 
-    # Sets interpreter mode a.k.a. JS language version.
     # @private
     def javascript_version=(version)
       warn "#{self}#javascript_version = not supported, use open(javascript_version: #{version.inspect}) instead"
     end
     alias :version= :javascript_version=
 
+    # @private
     ScriptException = javax.script.ScriptException
 
     def open
@@ -168,7 +163,7 @@ module Nashorn
       @io = io
     end
 
-    # implement int Reader#read(char[] buffer, int offset, int length)
+    # int Reader#read(char[] buffer, int offset, int length)
     def read(buffer, offset, length)
       str = nil
       begin
