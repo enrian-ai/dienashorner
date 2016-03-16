@@ -6,7 +6,7 @@ rescue LoadError => e
 end
 
 if ENV_JAVA['java.version'] < '1.8'
-  warn "Nashorn needs Java >= 8, you're Java version #{ENV_JAVA['java.version']} won't work!"
+  warn "Nashorn needs Java >= 8, JRE #{ENV_JAVA['java.version']} likely won't work!"
 end
 
 module Nashorn
@@ -17,15 +17,17 @@ module Nashorn
     ScriptObject = Java::JdkNashornInternalRuntime::ScriptObject rescue nil
   end
 
-  class << self
-
-    def eval_js(source, options = {})
-      factory = JS::NashornScriptEngineFactory.new
-      factory.getScriptEngine.eval(source)
-    end
-    alias_method :eval, :eval_js
-
+  def eval_js(source, options = {})
+    factory = JS::NashornScriptEngineFactory.new
+    factory.getScriptEngine.eval(source)
   end
+
+  module_function :eval_js # due include Nashorn
+
+  class << self
+    alias_method :eval, :eval_js # Nashorn.eval '"4" + 2'
+  end
+
 end
 
 require 'nashorn/version'
