@@ -1,17 +1,18 @@
 # dia nashorner
 
 Embed the ~~Mozilla Rhino~~ Nashorn JavaScript interpreter into Ruby.
+
 Nashorn JS engine is available with Java 8 installs (try `jjs -v`).
 
 
-## Requirements
+### Requirements
 
-Java **>= 8**!
+Java **>= 8**
 
 `jruby -S gem install dienashorner` # make sure you have JRuby >= 1.7.x
 
 
-## Features
+### Features
 
 * Evaluate JavaScript bits from the Ruby side
 * Embed Ruby objects into the JavaScript world
@@ -70,7 +71,7 @@ end
 
 ### Context Options
 
-Mostly the same as with **jjs** e.g. `Nashorn::Context.open(:strict => true)`.
+Mostly the same as with **`jjs`** e.g. `Nashorn::Context.open(:strict => true)`.
 
 
 ### Loading .js
@@ -134,19 +135,19 @@ Rhino::Ruby::Scriptable.access = FooApp::BarAccess.instance
 -->
 
 
-## Rhino Compatibility
+### Rhino Compatibility
 
 Nashorn was inspired (and crafted) from Rhino a.k.a **therubyrhino** JRuby gem.
 Far from being a drop-in replacement although there's `require 'nashorn/rhino'`.
 
 
-## Less.rb
+### Less.rb
 
 [Less.rb](https://github.com/cowboyd/less.rb) seems to be working, for now you
 will simply need to :`require 'nashorn/rhino/less'` before a `require 'less'`.
 
 
-## Nashorn
+### Nashorn
 
 Nashorn JavaScript runtime is part of OpenJDK http://openjdk.java.net/projects/nashorn/
 
