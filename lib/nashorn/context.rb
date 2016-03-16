@@ -18,12 +18,12 @@ module Nashorn
 
     class << self
 
-      def open(options = {}, &block)
+      def open(options = nil, &block)
         new(options).open(&block)
       end
 
-      def eval(javascript)
-        new.eval(javascript)
+      def eval(source, options = nil)
+        new(options).eval(source)
       end
 
     end
