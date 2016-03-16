@@ -8,7 +8,9 @@ module Nashorn
       end
 
       def []=(key, value)
-        key.is_a?(Fixnum) ? setSlot(key, value) : setMember(key.to_s, value)
+        js_val = Nashorn.to_js value
+        key.is_a?(Fixnum) ? setSlot(key, js_val) : setMember(key.to_s, js_val)
+        js_val
       end
 
       # enumerate the key value pairs contained in this javascript object. e.g.
@@ -146,7 +148,9 @@ module Nashorn
 
       # @private NOTE: duplicated from JSObject
       def []=(key, value)
-        key.is_a?(Fixnum) ? setSlot(key, value) : setMember(key.to_s, value)
+        js_val = Nashorn.to_js value
+        key.is_a?(Fixnum) ? setSlot(key, js_val) : setMember(key.to_s, js_val)
+        js_val
       end
 
       # @private NOTE: duplicated from JSObject
@@ -156,6 +160,22 @@ module Nashorn
       rescue JS::NashornException => e
         raise Nashorn::JSError.new(e)
       end
+
+#      def callMember(this, *args)
+#        this = nil
+#        Nashorn.to_rb __call__ this, Nashorn.args_to_js(args)
+#      rescue JS::NashornException => e
+#        raise Nashorn::JSError.new(e)
+#      end
+
+      #def to_s
+      #  toString
+      #end
+
+      #def inspect
+      #  id_hash = Java::JavaLang::System.identityHashCode(self)
+      #  "<##{self.class.name}:0x#{Java::JavaLang::Integer.toHexString(id_hash)} #{to_s}>"
+      #end
 
     end
 

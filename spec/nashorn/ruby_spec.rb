@@ -62,7 +62,9 @@ describe Nashorn::Ruby::Object do
     attr_reader :reader
     attr_writer :writer
 
-    def method; nil; end
+    def method; nil end
+
+    def self.a_class_method; end
 
   end
 
@@ -84,7 +86,7 @@ describe Nashorn::Ruby::Object do
     rb_object.put('nonExistingAttr', start, 42)
   end
 
-  it "getIds include ruby class methods" do
+  it "js members include ruby class methods" do
     rb_object = Nashorn::Ruby::Object.wrap UII.new
 
     rb_object.keySet.should include("reader")
@@ -93,7 +95,7 @@ describe Nashorn::Ruby::Object do
     rb_object.keySet.to_a.should include("writer")
   end
 
-  it "getIds include ruby instance methods" do
+  it "js members include ruby instance methods" do
     rb_object = Nashorn::Ruby::Object.wrap object = UII.new
     object.instance_eval do
       def foo; 'foo'; end
@@ -102,7 +104,7 @@ describe Nashorn::Ruby::Object do
     rb_object.keySet.to_a.should include('foo')
   end
 
-  it "getIds include writers as attr names" do
+  it "js members include writers as attr names" do
     rb_object = Nashorn::Ruby::Object.wrap object = UII.new
 
     rb_object.keys.should include('writer')
@@ -114,6 +116,15 @@ describe Nashorn::Ruby::Object do
 
     rb_object.keySet.to_a.should include('foo')
     rb_object.keySet.to_a.should_not include('foo=')
+  end
+
+  it "js members include class methods for wrapped class" do
+    rb_object = Nashorn::Ruby::Object.wrap object = UII
+
+    rb_object.keys.should include('a_class_method')
+
+    rb_object.keys.should_not include('method')
+    rb_object.keys.should_not include('writer')
   end
 
   it "is aliased to RubyObject" do

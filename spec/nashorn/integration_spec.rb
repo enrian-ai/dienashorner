@@ -1,6 +1,5 @@
-require 'bundler/setup'
-
 require 'nashorn'
+require 'nashorn/context'
 require 'pathname'
 require 'stringio'
 
@@ -11,6 +10,10 @@ describe 'integration' do
   it "loads LESS" do
     require 'nashorn/rhino/less'
     require 'less'
+
+    expect( Less.Parser ).to be_a(Nashorn::JS::ScriptObjectMirror)
+    # exposes less.tree e.g. for attaching custom functions
+    Less.tree.functions['foo'] = lambda { |*args| 'bar' }
   end
 
   it "require foo" do # CommonJS
@@ -35,7 +38,6 @@ describe 'integration' do
 
   def new_environment(globals = {})
     context = Nashorn::Context.new
-    #context.optimization_level = -1
     globals.each { |key, obj| context[key] = obj }
     path = Pathname(__FILE__).dirname.join('integration')
     Env.new(context, :path => path.to_s)
@@ -56,11 +58,8 @@ describe 'integration' do
         filepath = find(module_id) or fail LoadError, "no such module '#{module_id}'"
         js = "( function(module, require, exports) {\n#{File.read(filepath)}\n} )"
         load = context.eval(js, filepath.expand_path.to_s)
-        puts load.inspect
-        puts load.class.inspect
         modules[module_id] = mod = Module.new(module_id, self)
         load.call(mod, mod.require_function, mod.exports)
-        # load.callMember(mod, mod.require_function, mod.exports)
       end
       return mod.exports
     end
@@ -106,7 +105,7 @@ describe 'integration' do
         module_id.split('/').inject(@segments[0..-2]) do |path, element|
           path.tap do
             if element == '.'
-              #do nothing
+              # do nothing
             elsif element == '..'
               path.pop
             else
