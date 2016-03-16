@@ -10,7 +10,7 @@ Gem::Specification.new do |gem|
   gem.version       = File.read(path).match( /.*VERSION\s*=\s*['"](.*)['"]/m )[1]
 
   gem.summary       = %q{The Nashorn JavaScript interpreter for JRuby}
-  gem.description   = %q{Nashorn, a Rhino's sucessor, allows embeded JavaScript interaction from within Ruby.}
+  gem.description   = %q{Nashorn, a Rhino's sucessor, allows embeded JavaScript interaction from Ruby.}
   gem.homepage      = "https://github.com/kares/dienashorner"
 
   gem.require_paths = ["lib"]
