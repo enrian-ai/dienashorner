@@ -1,6 +1,6 @@
 # dia nashorner
 
-Embed the ~~Mozilla Rhino~~ Nashorn JavaScript interpreter into Ruby.
+Embed the ~~Mozilla Rhino~~ [Nashorn][0] JavaScript interpreter into Ruby.
 
 Nashorn JS engine is available with Java 8 installs (try `jjs -v`).
 
@@ -166,5 +166,6 @@ Nashorn JavaScript runtime is part of [OpenJDK][4] (available since 8u40).
 
 Copyright (c) 2016 Karol Bucek. Apache License v2 (see LICENSE for details).
 
+[0]: http://www.oracle.com/technetwork/articles/java/jf14-nashorn-2126515.html
 [3]: https://github.com/rails/execjs
 [4]: http://openjdk.java.net/projects/nashorn/
