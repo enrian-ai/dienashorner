@@ -147,11 +147,24 @@ Far from being a drop-in replacement although there's `require 'nashorn/rhino'`.
 will simply need to :`require 'nashorn/rhino/less'` before a `require 'less'`.
 
 
+### ExecJS
+
+dienashorner gem ships with an [ExecJS][3] compatible runtime, its best to load it
+(`require 'nashorn/execjs/load'`) before ExecJS's auto-detection takes place :
+```ruby
+gem 'execjs', require: false
+gem 'dienashorner', platform: :jruby, require: [ 'nashorn/execjs/load', 'execjs' ]
+```
+
+
 ### Nashorn
 
-Nashorn JavaScript runtime is part of OpenJDK http://openjdk.java.net/projects/nashorn/
+Nashorn JavaScript runtime is part of [OpenJDK][4] (available since 8u40).
 
 
 ## Copyright
 
 Copyright (c) 2016 Karol Bucek. Apache License v2 (see LICENSE for details).
+
+[3]: https://github.com/rails/execjs
+[4]: http://openjdk.java.net/projects/nashorn/
