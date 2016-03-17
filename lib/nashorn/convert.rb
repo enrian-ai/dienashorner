@@ -1,11 +1,23 @@
 class << Nashorn
 
+  ScriptObjectMirror = Nashorn::JS::ScriptObjectMirror
+  private_constant :ScriptObjectMirror
+  ScriptObject = Nashorn::JS::ScriptObject
+  private_constant :ScriptObject
+
   def to_rb(object, unmirror = false)
     # ConsString for optimized String + operations :
     return object.toString if object.is_a?(Java::JavaLang::CharSequence)
     return object.unwrap if object.is_a?(Nashorn::RubyObject)
     return object.unwrap if object.is_a?(Nashorn::RubyFunction)
-    return nil if Nashorn::JS::ScriptObjectMirror.isUndefined(object)
+    return nil if ScriptObjectMirror.isUndefined(object)
+    # NOTE: "correct" Nashorn leaking-out internals :
+    if ScriptObject && object.is_a?(ScriptObject)
+      # BUGY: Java::JavaLang::ClassCastException:
+      #   jdk.nashorn.internal.scripts.JO4 cannot be cast to jdk.nashorn.api.scripting.ScriptObjectMirror
+      #   jdk.nashorn.api.scripting.ScriptUtils.wrap(jdk/nashorn/api/scripting/ScriptUtils.java:92)
+      # object = Nashorn::JS::ScriptUtils.wrap(object)
+    end
     return js_mirror_to_rb(object) if unmirror
     object
   end
@@ -42,7 +54,6 @@ class << Nashorn
                   ENV_JAVA['nashorn.to_rb.unmirror.deep'] != 'false'
 
   def js_mirror_to_rb(object, deep = DEEP_UNMIRROR)
-    object = Nashorn::JS::ScriptUtils.unwrap(object)
     if object.is_a?(Nashorn::JS::JSObject)
       if object.isArray
         return object.raw_values.to_a unless deep

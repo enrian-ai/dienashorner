@@ -330,22 +330,21 @@ module Nashorn
     # @private
     class Exception < JS::NashornException
 
-      def initialize(value)
-        super wrap_value(value)
+      attr_reader :thrown
+
+      def initialize(error)
+        super error.message, error.is_a?(Java::JavaLang::Throwable) ? error : nil
+        @thrown = error
       end
 
-      private
-
-      def wrap_value(value)
-        value.is_a?(Object) ? value : Object.wrap(value)
-      end
+      def getThrown; @thrown end
 
     end
 
     def self.wrap_error(e, backtrace = nil)
-      error = Exception.new(e)
-      error.set_backtrace(backtrace) if backtrace
-      error
+      js_error = Exception.new(e)
+      js_error.set_backtrace(backtrace) if backtrace
+      js_error
     end
 
   end
