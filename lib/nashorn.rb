@@ -15,6 +15,7 @@ module Nashorn
     include_package 'jdk.nashorn.api.scripting'
     # include_package 'jdk.nashorn.internal.runtime'
     ScriptObject = Java::JdkNashornInternalRuntime::ScriptObject rescue nil
+    # Undefined = Java::JdkNashornInternalRuntime::Undefined rescue nil
   end
 
   def eval_js(source, options = {})
@@ -27,6 +28,8 @@ module Nashorn
   class << self
     alias_method :eval, :eval_js # Nashorn.eval '"4" + 2'
   end
+
+  autoload :Context, 'nashorn/context'
 
 end
 
