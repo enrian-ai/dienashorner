@@ -4,7 +4,7 @@ describe Nashorn do
 
   it 'allows to eval js on Nashorn' do
     expect( Nashorn.eval '"4" + 2' ).to eql '42'
-    expect( Nashorn.eval_js 'true + 10' ).to eql '11'
+    expect( Nashorn.eval_js 'true + 100' ).to eql 101
   end
 
   class NashornStub
