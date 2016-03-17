@@ -56,11 +56,20 @@ module Nashorn
     end
 
     # Return the thown (native) JavaScript value.
-    def value(unwrap = false)
-      return @value if defined?(@value) && ! unwrap
-      @value = get_thrown unless defined?(@value)
-      return @value.unwrap if unwrap && @value.respond_to?(:unwrap)
-      @value
+    def value(unwrap = nil) # (unwrap = false)
+      # return @value if defined?(@value) && ! unwrap
+      # @value = get_thrown unless defined?(@value)
+      # return @value.unwrap if unwrap && @value.respond_to?(:unwrap)
+      # @value
+
+      return @value if defined?(@value)
+      
+      if thrown = get_thrown
+        # NOTE: thrown sometimes leaks a Nashorn::JS::ScriptObject
+        @value = Nashorn.to_rb thrown
+      else
+        @value = thrown
+      end
     end
     alias_method :thrown, :value
 
