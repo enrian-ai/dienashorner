@@ -269,8 +269,7 @@ module Nashorn
         # Nashorn.to_js(result) # TODO do not convert if java_args ?
       end
 
-      # make sure redefined :call is aliased not the one "inherited" from
-      # JS::BaseFunction#call when invoking __call__ (@see ext.rb)
+      # make sure redefined :call is aliased not the one "inherited" (@see ext.rb)
       alias_method :__call__, :call
 
     end

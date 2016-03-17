@@ -1,6 +1,11 @@
 module Nashorn
   module JS
 
+    AbstractJSObject.module_eval do
+      alias_method :raw_values, :values
+      alias_method :__call__, :call
+    end
+
     JSObject.module_eval do
 
       def [](key)
@@ -91,8 +96,7 @@ module Nashorn
         else
           if hasMember(name_str) && property = getMember(name_str)
             if property.is_a?(JSObject) && property.isFunction
-              js_args = Nashorn.args_to_js(args)
-              Nashorn.to_rb property.__call__(self, js_args)
+              Nashorn.to_rb property.__call__(self, *Nashorn.args_to_js(args))
             else
               if args.size > 0
                 raise ArgumentError, "can't call '#{name_str}' with args: #{args.inspect} as it's a property"
@@ -115,21 +119,7 @@ module Nashorn
       # JavaScript's Function#call but rather as Ruby's Method#call !
       # Use #apply or #bind before calling to achieve the same effect.
       def call(*args)
-        this = nil
-        Nashorn.to_rb __call__ this, Nashorn.args_to_js(args)
-      rescue JS::NashornException => e
-        raise Nashorn::JSError.new(e)
-      end
-
-      # bind a JavaScript function into the given (this) context
-      #def bind(this, *args)
-      #  args = Nashorn.args_to_js(args)
-      #  Rhino::JS::BoundFunction.new(self, Nashorn.to_js(this), args)
-      #end
-
-      # use JavaScript functions constructors from Ruby as `fn.new`
-      def new(*args)
-        newObject Nashorn.args_to_js(args)
+        Nashorn.to_rb __call__ nil, *Nashorn.args_to_js(args) # this = nil
       rescue JS::NashornException => e
         raise Nashorn::JSError.new(e)
       end
@@ -140,20 +130,28 @@ module Nashorn
       # NOTE: That #call from Ruby does not have the same semantics as
       # JavaScript's Function#call but rather as Ruby's Method#call !
       def apply(this, *args)
-        __call__ Nashorn.to_js(this), Nashorn.args_to_js(args)
+        __call__ Nashorn.to_js(this), *Nashorn.args_to_js(args)
       rescue JS::NashornException => e
         raise Nashorn::JSError.new(e)
       end
       alias_method :methodcall, :apply # V8::Function compatibility
 
+      # bind a JavaScript function into the given (this) context
+      #def bind(this, *args)
+      #  args = Nashorn.args_to_js(args)
+      #  Rhino::JS::BoundFunction.new(self, Nashorn.to_js(this), args)
+      #end
+
+      # use JavaScript functions constructors from Ruby as `fn.new`
+      def new(*args)
+        newObject *Nashorn.args_to_js(args)
+      rescue JS::NashornException => e
+        raise Nashorn::JSError.new(e)
+      end
+
     end
 
-    AbstractJSObject.module_eval do
-      alias_method :raw_values, :values
-      alias_method :__call__, :call
-    end
-
-    ScriptObjectMirror.module_eval do # implements java.util.Map
+    ScriptObjectMirror.class_eval do # implements java.util.Map
 
       # @private NOTE: duplicated from JSObject
       def [](key)
@@ -169,15 +167,14 @@ module Nashorn
 
       # @private NOTE: duplicated from JSObject
       def call(*args)
-        this = nil
-        Nashorn.to_rb __call__ this, Nashorn.args_to_js(args)
+        Nashorn.to_rb __call__ nil, *Nashorn.args_to_js(args) # this = nil
       rescue JS::NashornException => e
         raise Nashorn::JSError.new(e)
       end
 
 #      def callMember(this, *args)
 #        this = nil
-#        Nashorn.to_rb __call__ this, Nashorn.args_to_js(args)
+#        Nashorn.to_rb __call__ this, *Nashorn.args_to_js(args)
 #      rescue JS::NashornException => e
 #        raise Nashorn::JSError.new(e)
 #      end

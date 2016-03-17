@@ -32,18 +32,28 @@ class << Nashorn
     args.map { |arg| to_rb(arg) }
   end
 
-  def args_to_js(args)
-    args.map { |arg| to_js(arg) }.to_java
+  def args_to_js(args, to_java = false)
+    args = args.map { |arg| to_js(arg) }
+    to_java ? args.to_java : args
   end
 
-  def js_mirror_to_rb(object, deep = true)
+  DEEP_UNMIRROR = ENV_JAVA['nashorn.to_rb.unmirror.deep'] &&
+                  ENV_JAVA['nashorn.to_rb.unmirror.deep'].length > 0 &&
+                  ENV_JAVA['nashorn.to_rb.unmirror.deep'] != 'false'
+
+  def js_mirror_to_rb(object, deep = DEEP_UNMIRROR)
     object = Nashorn::JS::ScriptUtils.unwrap(object)
     if object.is_a?(Nashorn::JS::JSObject)
-      return object.values.to_a if object.isArray
-      return object if object.isFunction
+      if object.isArray
+        return object.raw_values.to_a unless deep
+        object.raw_values.map { |obj| to_rb(obj, true) }
+      end
+      return object if object.isFunction # TODO CallableHash < Hash?
       # Nashorn::JS::ScriptObjectMirror is already a Map but still :
       hash = {}
-      object.keySet.each { |key| hash[key] = to_rb object[key], true }
+      for key in object.keySet
+        hash[key] = deep ? to_rb(object[key], true) : object[key]
+      end
       hash
     else
       object
