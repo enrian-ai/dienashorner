@@ -13,6 +13,18 @@ module Nashorn
         js_val
       end
 
+      def has_key?(key); hasMember(key) end
+      alias_method :key?, :has_key?
+      alias_method :include?, :has_key?
+
+      def has_value?(val); raw_values.include?(val) end
+      alias_method :value?, :has_value?
+
+      def delete(key); removeMember(key) end
+
+      def length; keySet.size end
+      alias_method :size, :length
+
       # enumerate the key value pairs contained in this javascript object. e.g.
       #
       #     eval_js("{foo: 'bar', baz: 'bang'}").each do |key,value|
@@ -24,6 +36,7 @@ module Nashorn
       def each
         each_raw { |key, val| yield key, Nashorn.to_rb(val) }
       end
+      alias_method :each_pair, :each
 
       def each_key
         each_raw { |key, val| yield key }
@@ -44,7 +57,7 @@ module Nashorn
       end
 
       def values
-        values.to_a
+        raw_values.map { |val| Nashorn.to_rb(val) }
       end
 
       # Converts the native object to a hash. This isn't really a stretch since it's
@@ -136,6 +149,7 @@ module Nashorn
     end
 
     AbstractJSObject.module_eval do
+      alias_method :raw_values, :values
       alias_method :__call__, :call
     end
 
