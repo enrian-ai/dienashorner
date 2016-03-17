@@ -24,9 +24,9 @@ module ExecJS
         raise wrap_error(e)
       end
 
-      def call(properties, *args)
-        evaled = @nashorn_context.eval(properties)
-        unbox @nashorn_context.eval(properties).call(*args)
+      def call(prop, *args)
+        evaled = @nashorn_context.eval(prop)
+        unbox evaled.call(*args)
       rescue Exception => e
         raise wrap_error(e)
       end
@@ -49,14 +49,21 @@ module ExecJS
       def wrap_error(e)
         return e unless e.is_a?(::Nashorn::JSError)
 
-        error_class = e.message == "syntax error" ? RuntimeError : ProgramError
+        error_class = e.message.index('syntax error') ? RuntimeError : ProgramError
 
-        stack = e.backtrace
-        stack = stack.map { |line| line.sub(" at ", "").sub("<eval>", "(execjs)").strip }
-        stack.unshift("(execjs):1") if e.javascript_backtrace.empty?
+        backtrace = e.backtrace
 
-        error = error_class.new(e.value.to_s)
-        error.set_backtrace(stack)
+        if js_stack = e.javascript_backtrace
+          backtrace = backtrace - js_stack
+          # ["<<eval>>.<anonymous>(<eval>:1)", "<<eval>>.<program>(<eval>:1)"]
+          js_stack = js_stack.map { |line| line.sub(/\<eval\>\:/, "(execjs):") }
+          backtrace = js_stack + backtrace
+        elsif backtrace
+          backtrace = backtrace.dup; backtrace.unshift('(execjs):1')
+        end
+
+        error = error_class.new e.value ? e.value.to_s : e.message
+        error.set_backtrace(backtrace)
         error
       end
 
@@ -68,7 +75,7 @@ module ExecJS
 
     def available?
       return false unless defined? JRUBY_VERSION
-      require 'nashorn' # require 'nashorn/context'
+      require 'nashorn'
       true
     rescue LoadError
       false
