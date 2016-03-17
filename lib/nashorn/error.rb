@@ -8,12 +8,17 @@ module Nashorn
         if value.is_a?(Exception)
           super "#{value.class.name}: #{value.message}"
         elsif value.is_a?(JS::ScriptObject) # && @native.to_s.index('Error:')
-          super @native.message
+          super normalize_message(@native)
         else
           super value
         end
       else
-        super cause ? cause.message : @native
+        if cause = self.cause
+          message = normalize_message(cause)
+        else
+          message = normalize_message(@native)
+        end
+        super message
       end
     end
 
@@ -30,7 +35,7 @@ module Nashorn
       if @native.respond_to?(:cause) && @native.cause
         @cause = @native.cause
       else
-        @native.is_a?(JS::NashornException) ? @native : nil
+        @cause = @native.is_a?(JS::NashornException) ? @native : nil
       end
     end
 
@@ -70,10 +75,19 @@ module Nashorn
 
     # Returns the JavaScript back-trace part for this error (the script stack).
     def javascript_backtrace(raw_elements = false)
+      return @javascript_backtrace if (@javascript_backtrace ||= nil) && ! raw_elements
+
       return nil unless cause.is_a?(JS::NashornException)
-      JS::NashornException.getScriptFrames(cause).map do |element|
-        raw_elements ? element : element.to_s # ScriptStackElement
+
+      return JS::NashornException.getScriptFrames(cause) if raw_elements
+
+      js_backtrace = []
+      js_backtrace << @_trace_trail if defined?(@_trace_trail)
+
+      for element in JS::NashornException.getScriptFrames(cause)
+        js_backtrace << element.to_s # element - ScriptStackElement
       end
+      @javascript_backtrace = js_backtrace
     end
 
     # jdk.nashorn.internal.runtime::ECMAException < NashornException has these :
@@ -90,6 +104,14 @@ module Nashorn
       cause.respond_to?(:getColumnNumber) ? cause.getColumnNumber : nil
     end
 
+    PARSER_EXCEPTION = 'Java::JdkNashornInternalRuntime::ParserException'
+    private_constant :PARSER_EXCEPTION if respond_to?(:private_constant)
+
+    # @private invented for ExceJS
+    def self.parse_error?(error)
+      PARSER_EXCEPTION.eql? error.class.name
+    end
+
     private
 
     def get_thrown
@@ -98,6 +120,18 @@ module Nashorn
       else
         nil
       end
+    end
+
+    def normalize_message(error)
+      # "<eval>:1:1 Expected an operand but found )\n ())\n^"
+      # extract first trace part of message :
+      message = error.message
+      return message unless JSError.parse_error?(error)
+      if match = message.match(/^(.*?\:\d+\:\d+)\s/)
+        @_trace_trail = match[1]
+        return message[@_trace_trail.length + 1..-1]
+      end
+      message
     end
 
   end

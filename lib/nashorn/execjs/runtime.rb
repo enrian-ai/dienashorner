@@ -49,7 +49,7 @@ module ExecJS
       def wrap_error(e)
         return e unless e.is_a?(::Nashorn::JSError)
 
-        error_class = e.message.index('syntax error') ? RuntimeError : ProgramError
+        error_class = ::Nashorn::JSError.parse_error?(e.cause) ? RuntimeError : ProgramError
 
         backtrace = e.backtrace
 
