@@ -7,6 +7,7 @@ group :test do
   #gem 'redjs', :git => 'git://github.com/cowboyd/redjs.git', :group => :test,
   #             :ref => "0d844f066666f967a78b20beb164c52d9ac3f5ca"
   gem 'less', '~> 2.6.0', :require => false
+  gem 'execjs', '2.6.0', :require => false
 end
 
 gem 'rake', :require => false, :group => :development
