@@ -7,7 +7,7 @@ puts "Nashorn #{Nashorn::VERSION}"
 
 describe 'integration' do
 
-  it "loads LESS" do
+  it "Less.js: loads (less.rb)" do
     require 'nashorn/rhino/less'
     require 'less'
 
@@ -16,7 +16,7 @@ describe 'integration' do
     Less.tree.functions['foo'] = lambda { |*args| 'bar' }
   end
 
-  it "require foo" do # CommonJS
+  it "CommonJS: require foo" do # CommonJS
     environment = new_environment(:console => Console)
     environment.native 'util', Util.new(out = StringIO.new)
     exports = environment.require 'foo'
@@ -28,7 +28,7 @@ describe 'integration' do
     exports.foo['Bar'][:puts].should be_a Nashorn::JS::JSObject # Rhino::JS::Function
   end
 
-  it "require index/loop" do # CommonJS
+  it "CommonJS: require index/loop" do # CommonJS
     environment = new_environment(:console => Console)
     environment.require 'index'
     environment.context['Loop'].should_not be nil
