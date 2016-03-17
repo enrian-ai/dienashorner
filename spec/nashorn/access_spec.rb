@@ -32,7 +32,7 @@ describe Nashorn::Ruby::AttributeAccess do
   it "gets methods and instance variables" do
     rb_object = Nashorn::Ruby::Object.wrap Meh.new
 
-    rb_object.get('anAttr0', nil).should be_nil
+    rb_object.get('anAttr0', nil).should be nil
     rb_object.get('the_attr_1', nil).should == 'attr_1'
 
     # rb_object.get('an_attr_2', nil).should be(Rhino::JS::Scriptable::NOT_FOUND) # no reader
@@ -49,23 +49,21 @@ describe Nashorn::Ruby::AttributeAccess do
   it "has methods and instance variables" do
     rb_object = Nashorn::Ruby::Object.wrap Meh.new
 
-    rb_object.has('anAttr0', nil).should be_true
-    rb_object.has('the_attr_1', nil).should be_true
-    rb_object.has('an_attr_2', nil).should be_false # no reader nor writer
+    rb_object.has('anAttr0', nil).should be true
+    rb_object.has('the_attr_1', nil).should be true
+    rb_object.has('an_attr_2', nil).should be false # no reader nor writer
 
     [ 'theMethod0', 'a_method1', 'the_method_2' ].each do |name|
-      rb_object.has(name, nil).should be_true
+      rb_object.has(name, nil).should be true
     end
 
-    rb_object.has('non-existent-method', nil).should be_false
+    rb_object.has('non-existent-method', nil).should be false
   end
 
   it "puts using attr writer" do
-    start = mock('start')
-    start.expects(:put).never
     rb_object = Nashorn::Ruby::Object.wrap Meh.new
 
-    rb_object.put('the_attr_1', start, 42)
+    rb_object.put('the_attr_1', 42)
     rb_object.the_attr_1.should == 42
   end
 
