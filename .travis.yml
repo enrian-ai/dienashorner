@@ -1,0 +1,15 @@
+rvm:
+  - jruby-1.7.24
+  - jruby-9.0.5.0
+jdk:
+  - oraclejdk8
+
+script: "if [[ -v COMMAND ]]; then $COMMAND; else rake spec; fi"
+
+env:
+  global:
+    - JAVA_OPTS="-Xmx512M"
+  matrix:
+    - COMMAND="ruby -Ilib spec/nashorn/test_execjs.rb"
+    - EMPTY='' # COMMAND="rake spec"
+    
