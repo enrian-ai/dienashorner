@@ -85,6 +85,8 @@ module Nashorn
 
     def factory; @native.getFactory end
 
+    attr_reader :scope
+
     # Read a value from the global scope of this context
     def [](key)
       @scope[key]
@@ -100,19 +102,19 @@ module Nashorn
     FILENAME = javax.script.ScriptEngine.FILENAME
 
     # Evaluate a String/IO of JavaScript in this context.
-    def eval(source, file_name = nil, line_number = nil)
+    def eval(source, filename = nil, line = nil)
       open do
         if IO === source || StringIO === source
           source = IOReader.new(source)
         else
           source = source.to_s
         end
-        @native.put(FILENAME, file_name) if file_name
+        @native.put(FILENAME, filename) if filename
         Nashorn.to_rb @native.eval(source, @scope)
       end
     end
-    
-    def evaluate(source, file_name = nil); eval(source, file_name) end
+
+    def evaluate(source, filename = nil); eval(source, filename) end
 
     # Read the contents of <tt>filename</tt> and evaluate it as JavaScript.
     #
