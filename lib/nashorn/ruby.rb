@@ -88,6 +88,11 @@ module Nashorn
 
       private
 
+      # @private
+      NUMBER_CLASS = Java::JavaLang::Number.java_class
+      # @private
+      STRING_CLASS = Java::JavaLang::String.java_class
+
       def convert(name)
         if exclude?(name)
           nil
@@ -128,6 +133,20 @@ module Nashorn
       # @override
       def isInstance(instance)
         instance.class.equal? @unwrap
+      end
+
+      # @override
+      def isInstanceOf(clazz)
+        @unwrap.is_a?(clazz)
+      end
+
+      # @override
+      def getDefaultValue(hint)
+        if hint && NUMBER_CLASS.eql?(hint)
+          return hint.to_f if hint.respond_to?(:to_f)
+          return hint.to_i if hint.respond_to?(:to_i)
+        end
+        @unwrap.to_s
       end
 
       # @override
@@ -191,6 +210,16 @@ module Nashorn
       # @override
       def isInstance(instance)
         instance.class.equal? @unwrap
+      end
+
+      # @override
+      def isInstanceOf(clazz)
+        @unwrap.is_a?(clazz)
+      end
+
+      # @override
+      def getDefaultValue(hint)
+        @unwrap.to_s
       end
 
       # @override

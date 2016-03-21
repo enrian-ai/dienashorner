@@ -7,6 +7,14 @@ describe Nashorn do
     expect( Nashorn.eval_js 'true + 100' ).to eql 101
   end
 
+  it 'getDefaultValue is used for toString' do
+    arr = Nashorn.eval('[ 1, 2 ]')
+    expect( arr ).to be_a Nashorn::JS::JSObject
+    expect( arr.getDefaultValue(nil) ).to eql '1,2'
+    expect( arr.getDefaultValue(java.lang.Number.java_class) ).to eql '1,2'
+    expect( arr.getDefaultValue(java.lang.String.java_class) ).to eql '1,2'
+  end
+
   class NashornStub
     include Nashorn
 

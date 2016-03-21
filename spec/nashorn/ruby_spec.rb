@@ -127,6 +127,14 @@ describe Nashorn::Ruby::Object do
     rb_object.keys.should_not include('writer')
   end
 
+  it 'getDefaultValue returns to_s' do
+    rb_object = Nashorn::Ruby::Object.wrap object = UII.new
+    str = object.to_s # <UII:0x7b9a4292>
+    expect( rb_object.getDefaultValue(nil) ).to eql str
+    expect( rb_object.getDefaultValue(java.lang.Number.java_class) ).to eql str
+    expect( rb_object.getDefaultValue(java.lang.String.java_class) ).to eql str
+  end
+
   it "is aliased to RubyObject" do
     Nashorn::RubyObject.should be(Nashorn::Ruby::Object)
   end
