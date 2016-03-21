@@ -18,7 +18,7 @@ module Nashorn
     # Undefined = Java::JdkNashornInternalRuntime::Undefined rescue nil
   end
 
-  def eval_js(source, options = {})
+  def eval_js(source, options = nil)
     factory = JS::NashornScriptEngineFactory.new
     factory.getScriptEngine.eval(source)
   end
