@@ -96,19 +96,23 @@ module Nashorn
       @scope[key] = val
     end
 
+    # @private
+    FILENAME = javax.script.ScriptEngine.FILENAME
+
     # Evaluate a String/IO of JavaScript in this context.
-    def eval(source, source_name = "<eval>", line_number = 1)
+    def eval(source, file_name = nil, line_number = nil)
       open do
         if IO === source || StringIO === source
           source = IOReader.new(source)
         else
           source = source.to_s
         end
+        @native.put(FILENAME, file_name) if file_name
         Nashorn.to_rb @native.eval(source, @scope)
       end
     end
-
-    def evaluate(source); eval(source) end
+    
+    def evaluate(source, file_name = nil); eval(source, file_name) end
 
     # Read the contents of <tt>filename</tt> and evaluate it as JavaScript.
     #
