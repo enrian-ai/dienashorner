@@ -143,8 +143,8 @@ Far from being a drop-in replacement although there's `require 'nashorn/rhino'`.
 
 ### Less.rb
 
-[Less.rb](https://github.com/cowboyd/less.rb) seems to be working, for now you
-will simply need to :`require 'nashorn/rhino/less'` before a `require 'less'`.
+[Less.rb](https://github.com/cowboyd/less.rb) seems to be working (with hacks),
+for now you will need to :`require 'nashorn/rhino/less'` before `require 'less'`.
 
 
 ### ExecJS
