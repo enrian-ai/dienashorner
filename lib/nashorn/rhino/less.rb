@@ -61,20 +61,17 @@ module Less
       private
 
       def handle_js_error(e)
-
-        raise e # TODO NOT IMPLEMENTED
-
         #if e.value && ( e.value['message'] || e.value['type'].is_a?(String) )
         #  raise Less::ParseError.new(e, e.value) # LessError
         #end
-        #if e.unwrap.to_s =~ /missing opening `\(`/
-        #  raise Less::ParseError.new(e.unwrap.to_s)
-        #end
+        raise Less::ParseError.new(e) if ::Nashorn::JSError.parse_error?(e.cause)
+
+        msg = e.value.to_s
+        raise Less::ParseError.new(msg) if msg.start_with?("missing opening `(`")
         #if e.message && e.message[0, 12] == "Syntax Error"
         #  raise Less::ParseError.new(e)
-        #else
-        #  raise Less::Error.new(e)
         #end
+        raise Less::Error.new(e)
       end
 
     end
