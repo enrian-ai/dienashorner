@@ -75,7 +75,51 @@ module Less
       end
 
     end
+
+    def self.to_js_hash(hash) # TODO this needs to be figured out
+      # we can not pass wrapped Ruby Hash objects down as they won't
+      # have a prototype (and thus no hasOwnProperty)
+      js_hash = Nashorn.eval_js '({})'
+      hash.each { |key, val| js_hash[key] = val }
+      js_hash
+    end
+
   end
 end
 
 Less::JavaScript.context_wrapper = Less::JavaScript::NashornContext
+
+require 'less'
+
+Less::Parser.class_eval do
+
+  def initialize(options = {})
+    env = {}
+    Less.defaults.merge(options).each do |key, val|
+      env[key.to_s] =
+        case val
+        when Symbol, Pathname then val.to_s
+        when Array
+          val.map!(&:to_s) if key.to_sym == :paths # might contain Pathname-s
+          val # keep the original passed Array
+        else val # true/false/String/Method
+        end
+    end
+    ###
+    env = Less::JavaScript.to_js_hash env
+    ###
+    @parser = Less::JavaScript.exec { Less['Parser'].new(env) }
+  end
+
+end
+
+Less::Parser::Tree.class_eval do
+
+  def to_css(opts = {})
+    ###
+    opts = Less::JavaScript.to_js_hash opts
+    ###
+    Less::JavaScript.exec { @tree.toCSS(opts) }
+  end
+
+end
