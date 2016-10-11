@@ -1,10 +1,11 @@
+# frozen_string_literal: true
 require 'execjs/runtime'
 
 module ExecJS
   class NashornRuntime < Runtime
     class Context < Runtime::Context
 
-      def initialize(runtime, source = nil)
+      def initialize(_, source = nil, _ = nil)
         source = encode(source) if source
         @nashorn_context = ::Nashorn::Context.new
         @nashorn_context.eval(source) if source
@@ -17,7 +18,7 @@ module ExecJS
         eval "(function(){#{source}})()", options if /\S/ =~ source
       end
 
-      def eval(source, options = nil) # options not used
+      def eval(source, _ = nil) # options not used
         source = encode(source)
         unbox @nashorn_context.eval("(#{source})") if /\S/ =~ source
       rescue Exception => e
@@ -25,10 +26,11 @@ module ExecJS
       end
 
       def call(prop, *args)
-        evaled = @nashorn_context.eval(prop)
-        unbox evaled.call(*args)
-      rescue Exception => e
-        raise wrap_error(e)
+      #  evaled = @nashorn_context.eval(prop)
+      #  unbox evaled.call(*args)
+      #rescue Exception => e
+      #  raise wrap_error(e)
+        eval "#{prop}.apply(this, #{::JSON.generate(args)})"
       end
 
       def unbox(value)

@@ -60,7 +60,7 @@ describe "JS Array" do
   end
 
   it 'routes rhino methods' do
-    @object.prototype.should_not be nil
+    @object.proto.should_not be nil
     @object.class_name.should == 'Array'
   end
 
