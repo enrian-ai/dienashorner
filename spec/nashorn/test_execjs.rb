@@ -1,7 +1,14 @@
 # -*- coding: utf-8 -*-
 require "minitest/autorun"
-require "execjs/module"
+
 require "json"
+
+require "execjs/module"
+
+require "execjs/version"
+puts "ExecJS::VERSION: #{ExecJS::VERSION}"
+
+require "nashorn/execjs/load"
 
 begin
   require "execjs"
@@ -365,4 +372,3 @@ class TestExecJS < Test
   end
 
 end
-
