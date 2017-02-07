@@ -1,6 +1,7 @@
 rvm:
-  - jruby-1.7.24
+  - jruby-1.7.26
   - jruby-9.0.5.0
+  - jruby-9.1.7.0
 jdk:
   - oraclejdk8
 
@@ -12,4 +13,3 @@ env:
   matrix:
     - COMMAND="ruby -Ilib spec/nashorn/test_execjs.rb"
     - EMPTY='' # COMMAND="rake spec"
-    
