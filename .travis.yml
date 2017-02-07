@@ -5,6 +5,9 @@ rvm:
 jdk:
   - oraclejdk8
 
+before_install:
+  - jruby -v
+
 script: "if [[ -v COMMAND ]]; then $COMMAND; else rake spec; fi"
 
 env:
