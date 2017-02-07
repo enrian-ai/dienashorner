@@ -2,12 +2,12 @@
 
 Embed the ~~Mozilla Rhino~~ [Nashorn][0] JavaScript interpreter into Ruby.
 
-Nashorn JS engine is available with Java 8 installs (try `jjs -v`).
+Nashorn JavaScript engine is part of [OpenJDK][4] (since 8u40), try `jjs -v`.
 
 
 ### Requirements
 
-Java **>= 8**
+Java (Open/Oracle JRE) **>= 8**
 
 `jruby -S gem install dienashorner` # make sure you have JRuby >= 1.7.x
 
@@ -141,12 +141,6 @@ Nashorn was inspired (and crafted) from Rhino a.k.a **therubyrhino** JRuby gem.
 Far from being a drop-in replacement although there's `require 'nashorn/rhino'`.
 
 
-### Less.rb
-
-[Less.rb](https://github.com/cowboyd/less.rb) seems to be working (with hacks),
-for now you will need to :`require 'nashorn/rhino/less'` before `require 'less'`.
-
-
 ### ExecJS
 
 dienashorner gem ships with an [ExecJS][3] compatible runtime, its best to load it
@@ -156,15 +150,23 @@ gem 'execjs', require: false
 gem 'dienashorner', platform: :jruby, require: [ 'nashorn/execjs/load', 'execjs' ]
 ```
 
+when auto-detection is not used, set the runtime manually :
+```ruby
+require 'execjs/module'
+require 'nashorn/execjs/load'
+ExecJS.runtime = ExecJS::NashornRuntime.new
+```
 
-### Nashorn
 
-Nashorn JavaScript runtime is part of [OpenJDK][4] (available since 8u40).
+### Less.rb
+
+[Less.rb](https://github.com/cowboyd/less.rb) seems to be working (with hacks),
+for now you will need to :`require 'nashorn/rhino/less'` before `require 'less'`.
 
 
 ## Copyright
 
-Copyright (c) 2016 Karol Bucek. Apache License v2 (see LICENSE for details).
+Copyright (c) 2017 Karol Bucek. Apache License v2 (see LICENSE for details).
 
 [0]: http://www.oracle.com/technetwork/articles/java/jf14-nashorn-2126515.html
 [3]: https://github.com/rails/execjs
