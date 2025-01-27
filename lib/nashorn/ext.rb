@@ -190,9 +190,9 @@ module Nashorn
 
     end
 
-    NashornException.class_eval do
-      alias_method :value, :thrown
-    end
+#    NashornException.class_eval do
+#      alias_method :value, :thrown
+#    end
 
   end
 end
